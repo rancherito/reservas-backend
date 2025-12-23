@@ -3,6 +3,16 @@
 # Script de despliegue automático para reservas-backend
 # Se ejecuta cada minuto via cron
 
+# Cargar variables de entorno
+export HOME="/root"
+export NVM_DIR="$HOME/.nvm"
+
+# Cargar NVM
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Cargar Bun
+export PATH="/root/.bun/bin:$PATH"
+
 echo "$(date): Iniciando verificación de actualizaciones..."
 
 # Cambiar al directorio del proyecto
@@ -23,13 +33,13 @@ if [ "$LOCAL" != "$REMOTE" ]; then
 
     # Instalar dependencias si package.json cambió
     if git diff --name-only HEAD~1 | grep -q "package.json"; then
-        echo "$(date): package.json cambió, instalando dependencias..."
-        bun install
+    pm2 restart reservas-backend  /root/.bun/bin/pm2 restart reservas-backend
+    elif [ -f "/usr/local/bin/pm2" ]; then
+        /usr/local/bin/pm2 restart reservas-backend
+    else
+        echo "$(date): ❌ Error: PM2 no encontrado"
+        exit 1
     fi
-
-    # Reiniciar la aplicación con PM2
-    echo "$(date): Reiniciando aplicación..."
-    pm2 restart reservas-backend
 
     echo "$(date): ✅ Despliegue completado exitosamente"
 else
