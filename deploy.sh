@@ -33,10 +33,12 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     git pull origin main
 
     # Instalar dependencias
-    bun install    
+    bun install
 
     # Reiniciar la aplicación con PM2
-    if [ -f "/root/.bun/bin/pm2" ]; then
+    if command -v pm2 &> /dev/null; then
+        pm2 restart reservas-backend
+    elif [ -f "/root/.bun/bin/pm2" ]; then
         /root/.bun/bin/pm2 restart reservas-backend
     elif [ -f "/usr/local/bin/pm2" ]; then
         /usr/local/bin/pm2 restart reservas-backend
