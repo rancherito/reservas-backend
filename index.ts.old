@@ -1,0 +1,306 @@
+import express from "express";
+import cors from "cors";
+import { Database } from "bun:sqlite";
+
+const app = express();
+const db = new Database("reservas.db");
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Crear tabla de habitaciones si no existe
+db.run(`
+  CREATE TABLE IF NOT EXISTS habitaciones (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipo_habitacion TEXT NOT NULL,
+    piso INTEGER NOT NULL
+  )
+`);
+
+// Crear tabla de usuarios si no existe
+db.run(`
+  CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombres TEXT NOT NULL,
+    primer_apellido TEXT NOT NULL,
+    segundo_apellido TEXT NOT NULL,
+    dni TEXT NOT NULL UNIQUE
+  )
+`);
+
+// GET - Listar todas las habitaciones
+app.get("/habitaciones", (req, res) => {
+  try {
+    const habitaciones = db.query("SELECT * FROM habitaciones").all();
+    res.json(habitaciones);
+  } catch (error) {
+    res.status(500).json({ error: "Error al listar habitaciones" });
+  }
+});
+
+// GET - Obtener una habitación por ID
+app.get("/habitaciones/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    const habitacion = db
+      .query("SELECT * FROM habitaciones WHERE id = ?")
+      .get(id);
+
+    if (!habitacion) {
+      return res.status(404).json({ error: "Habitación no encontrada" });
+    }
+
+    res.json(habitacion);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener habitación" });
+  }
+});
+
+// POST - Crear una nueva habitación
+app.post("/habitaciones", (req, res) => {
+  try {
+    const { tipo_habitacion, piso } = req.body;
+
+    if (!tipo_habitacion || piso === undefined) {
+      return res
+        .status(400)
+        .json({ error: "tipo_habitacion y piso son requeridos" });
+    }
+    const tipos = ["simple", "doble", "ejecutiva"];
+
+    if (!tipos.includes(tipo_habitacion.toLowerCase())) {
+      return res.status(400).json({
+        error: `tipo_habitacion inválido. Valores permitidos: ${tipos.join(", ")}`,
+      });
+    }
+
+    // Validar máximo 8 habitaciones por piso
+    const habitacionesPiso = db.query(
+      "SELECT COUNT(*) as total FROM habitaciones WHERE piso = ?"
+    ).get(piso) as { total: number };
+
+    if (habitacionesPiso.total >= 8) {
+      return res.status(400).json({
+        error: "No se pueden crear más de 8 habitaciones por piso"
+      });
+    }
+
+    const query = db.query(
+      "INSERT INTO habitaciones (tipo_habitacion, piso) VALUES (?, ?) RETURNING *",
+    );
+    const habitacion = query.get(tipo_habitacion, piso);
+
+    res.status(201).json(habitacion);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al crear habitación" });
+  }
+});
+
+// PUT - Actualizar una habitación
+app.put("/habitaciones/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tipo_habitacion, piso } = req.body;
+
+    if (!tipo_habitacion || piso === undefined) {
+      return res
+        .status(400)
+        .json({ error: "tipo_habitacion y piso son requeridos" });
+    }
+
+    // Verificar si existe
+    const existe = db.query("SELECT * FROM habitaciones WHERE id = ?").get(id) as any;
+    if (!existe) {
+      return res.status(404).json({ error: "Habitación no encontrada" });
+    }
+
+    // Si cambia de piso, validar máximo 8 habitaciones en el nuevo piso
+    if (existe.piso !== piso) {
+      const habitacionesPiso = db.query(
+        "SELECT COUNT(*) as total FROM habitaciones WHERE piso = ?"
+      ).get(piso) as { total: number };
+
+      if (habitacionesPiso.total >= 8) {
+        return res.status(400).json({
+          error: "No se pueden tener más de 8 habitaciones por piso"
+        });
+      }
+    }
+
+    db.query(
+      "UPDATE habitaciones SET tipo_habitacion = ?, piso = ? WHERE id = ?",
+    ).run(tipo_habitacion, piso, id);
+
+    const habitacion = db
+      .query("SELECT * FROM habitaciones WHERE id = ?")
+      .get(id);
+    res.json(habitacion);
+  } catch (error) {
+    res.status(500).json({ error: "Error al actualizar habitación" });
+  }
+});
+
+// DELETE - Eliminar una habitación
+app.delete("/habitaciones/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const existe = db.query("SELECT * FROM habitaciones WHERE id = ?").get(id);
+    if (!existe) {
+      return res.status(404).json({ error: "Habitación no encontrada" });
+    }
+
+    db.query("DELETE FROM habitaciones WHERE id = ?").run(id);
+    res.json({ message: "Habitación eliminada exitosamente" });
+  } catch (error) {
+    res.status(500).json({ error: "Error al eliminar habitación" });
+  }
+});
+
+// ========== ENDPOINTS DE USUARIOS ==========
+
+// GET - Listar todos los usuarios
+app.get("/usuarios", (req, res) => {
+  try {
+    const usuarios = db.query("SELECT * FROM usuarios").all();
+    res.json(usuarios);
+  } catch (error) {
+    res.status(500).json({ error: "Error al listar usuarios" });
+  }
+});
+
+// GET - Obtener un usuario por ID
+app.get("/usuarios/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    const usuario = db
+      .query("SELECT * FROM usuarios WHERE id = ?")
+      .get(id);
+
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    res.json(usuario);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener usuario" });
+  }
+});
+
+// POST - Crear un nuevo usuario
+app.post("/usuarios", (req, res) => {
+  try {
+    const { nombres, primer_apellido, segundo_apellido, dni } = req.body;
+
+    // Validar campos requeridos
+    if (!nombres || !primer_apellido || !segundo_apellido || !dni) {
+      return res.status(400).json({
+        error: "Todos los campos son requeridos: nombres, primer_apellido, segundo_apellido, dni"
+      });
+    }
+
+    // Validar si el DNI ya existe
+    const usuarioExiste = db.query(
+      "SELECT * FROM usuarios WHERE dni = ?"
+    ).get(dni);
+
+    if (usuarioExiste) {
+      return res.status(400).json({
+        error: "Ya existe un usuario registrado con este DNI"
+      });
+    }
+
+    // Crear el usuario
+    const query = db.query(
+      "INSERT INTO usuarios (nombres, primer_apellido, segundo_apellido, dni) VALUES (?, ?, ?, ?) RETURNING *"
+    );
+    const usuario = query.get(nombres, primer_apellido, segundo_apellido, dni);
+
+    res.status(201).json(usuario);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al crear usuario" });
+  }
+});
+
+// PUT - Actualizar un usuario
+app.put("/usuarios/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombres, primer_apellido, segundo_apellido, dni } = req.body;
+
+    // Validar campos requeridos
+    if (!nombres || !primer_apellido || !segundo_apellido || !dni) {
+      return res.status(400).json({
+        error: "Todos los campos son requeridos: nombres, primer_apellido, segundo_apellido, dni"
+      });
+    }
+
+    // Verificar si el usuario existe
+    const existe = db.query("SELECT * FROM usuarios WHERE id = ?").get(id);
+    if (!existe) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    // Validar si el DNI ya existe en otro usuario
+    const dniExiste = db.query(
+      "SELECT * FROM usuarios WHERE dni = ? AND id != ?"
+    ).get(dni, id);
+
+    if (dniExiste) {
+      return res.status(400).json({
+        error: "Ya existe otro usuario registrado con este DNI"
+      });
+    }
+
+    // Actualizar el usuario
+    db.query(
+      "UPDATE usuarios SET nombres = ?, primer_apellido = ?, segundo_apellido = ?, dni = ? WHERE id = ?"
+    ).run(nombres, primer_apellido, segundo_apellido, dni, id);
+
+    const usuario = db.query("SELECT * FROM usuarios WHERE id = ?").get(id);
+    res.json(usuario);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al actualizar usuario" });
+  }
+});
+
+// DELETE - Eliminar un usuario
+app.delete("/usuarios/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const existe = db.query("SELECT * FROM usuarios WHERE id = ?").get(id);
+    if (!existe) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    db.query("DELETE FROM usuarios WHERE id = ?").run(id);
+    res.json({ message: "Usuario eliminado exitosamente" });
+  } catch (error) {
+    res.status(500).json({ error: "Error al eliminar usuario" });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`📋 Documentación API: http://localhost:${PORT}`);
+  console.log(`📝 Endpoints disponibles:`);
+  console.log(`\n   HABITACIONES:`);
+  console.log(`   GET    /habitaciones      - Listar todas las habitaciones`);
+  console.log(`   GET    /habitaciones/:id  - Obtener una habitación`);
+  console.log(`   POST   /habitaciones      - Crear una habitación (máx 8 por piso)`);
+  console.log(`   PUT    /habitaciones/:id  - Actualizar una habitación`);
+  console.log(`   DELETE /habitaciones/:id  - Eliminar una habitación`);
+  console.log(`\n   USUARIOS:`);
+  console.log(`   GET    /usuarios          - Listar todos los usuarios`);
+  console.log(`   GET    /usuarios/:id      - Obtener un usuario`);
+  console.log(`   POST   /usuarios          - Crear un usuario`);
+  console.log(`   PUT    /usuarios/:id      - Actualizar un usuario`);
+  console.log(`   DELETE /usuarios/:id      - Eliminar un usuario`);
+});
