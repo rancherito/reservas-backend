@@ -1,38 +1,41 @@
 {
-  "name": "reservas-backend",
-  "module": "src/index.ts",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "start": "bun src/index.ts",
-    "dev": "bun --watch src/index.ts",
-    "format": "prettier --write \"src/**/*.{ts,js,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,js,json}\"",
-    "pm2:start": "pm2 start ecosystem.config.cjs",
-    "pm2:stop": "pm2 stop reservas-backend",
-    "pm2:restart": "pm2 restart reservas-backend",
-    "pm2:delete": "pm2 delete reservas-backend",
-    "pm2:logs": "pm2 logs reservas-backend",
-    "pm2:monit": "pm2 monit",
-    "deploy:setup": "chmod +x setup-deploy.sh && chmod +x deploy.sh && ./setup-deploy.sh",
-    "deploy:logs": "tail -f deploy.log",
-    "deploy:test": "./deploy.sh",
-    "deploy:status": "./check-deploy.sh"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "prettier": "^3.7.4"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "cors": "^2.8.5",
-    "express": "^5.2.1",
-    "reflect-metadata": "^0.2.2",
-    "sql.js": "^1.13.0",
-    "typeorm": "^0.3.28"
-  }
+    "name": "reservas-backend",
+    "module": "src/index.ts",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "start": "bun src/index.ts",
+        "dev": "bun --watch src/index.ts",
+        "format": "prettier --write \"src/**/*.{ts,js,json}\"",
+        "format:check": "prettier --check \"src/**/*.{ts,js,json}\"",
+        "pm2:start": "pm2 start ecosystem.config.cjs",
+        "pm2:stop": "pm2 stop reservas-backend",
+        "pm2:restart": "pm2 restart reservas-backend",
+        "pm2:delete": "pm2 delete reservas-backend",
+        "pm2:logs": "pm2 logs reservas-backend",
+        "pm2:monit": "pm2 monit",
+        "deploy:setup": "chmod +x setup-deploy.sh && chmod +x deploy.sh && ./setup-deploy.sh",
+        "deploy:start": "crontab -l 2>/dev/null | grep -q 'deploy.sh' || (crontab -l 2>/dev/null; echo '* * * * * /root/reservas-backend/deploy.sh >> /root/reservas-backend/deploy.log 2>&1') | crontab -",
+        "deploy:stop": "crontab -l | grep -v 'deploy.sh' | crontab -",
+        "deploy:restart": "crontab -l | grep -v 'deploy.sh' | crontab - && (crontab -l 2>/dev/null; echo '* * * * * /root/reservas-backend/deploy.sh >> /root/reservas-backend/deploy.log 2>&1') | crontab -",
+        "deploy:logs": "tail -f deploy.log",
+        "deploy:test": "./deploy.sh",
+        "deploy:status": "./check-deploy.sh"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "prettier": "^3.7.4"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    },
+    "dependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.6",
+        "cors": "^2.8.5",
+        "express": "^5.2.1",
+        "reflect-metadata": "^0.2.2",
+        "sql.js": "^1.13.0",
+        "typeorm": "^0.3.28"
+    }
 }

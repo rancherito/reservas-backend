@@ -33,7 +33,12 @@ if [ "$LOCAL" != "$REMOTE" ]; then
 
     # Instalar dependencias si package.json cambió
     if git diff --name-only HEAD~1 | grep -q "package.json"; then
-    pm2 restart reservas-backend  /root/.bun/bin/pm2 restart reservas-backend
+        bun install
+    fi
+
+    # Reiniciar la aplicación con PM2
+    if [ -f "/root/.bun/bin/pm2" ]; then
+        /root/.bun/bin/pm2 restart reservas-backend
     elif [ -f "/usr/local/bin/pm2" ]; then
         /usr/local/bin/pm2 restart reservas-backend
     else
