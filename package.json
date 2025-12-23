@@ -15,12 +15,12 @@
         "pm2:logs": "pm2 logs reservas-backend",
         "pm2:monit": "pm2 monit",
         "deploy:setup": "chmod +x setup-deploy.sh && chmod +x deploy.sh && ./setup-deploy.sh",
-        "deploy:start": "crontab -l 2>/dev/null | grep -q 'deploy.sh' || (crontab -l 2>/dev/null; echo '* * * * * /root/reservas-backend/deploy.sh >> /root/reservas-backend/deploy.log 2>&1') | crontab -",
+        "deploy:start": "chmod +x deploy.sh && crontab -l 2>/dev/null | grep -q 'deploy.sh' || (crontab -l 2>/dev/null; echo '* * * * * /root/reservas-backend/deploy.sh >> /root/reservas-backend/deploy.log 2>&1') | crontab -",
         "deploy:stop": "crontab -l | grep -v 'deploy.sh' | crontab -",
-        "deploy:restart": "crontab -l | grep -v 'deploy.sh' | crontab - && (crontab -l 2>/dev/null; echo '* * * * * /root/reservas-backend/deploy.sh >> /root/reservas-backend/deploy.log 2>&1') | crontab -",
+        "deploy:restart": "chmod +x deploy.sh && crontab -l | grep -v 'deploy.sh' | crontab - && (crontab -l 2>/dev/null; echo '* * * * * /root/reservas-backend/deploy.sh >> /root/reservas-backend/deploy.log 2>&1') | crontab -",
         "deploy:logs": "tail -f deploy.log",
-        "deploy:test": "./deploy.sh",
-        "deploy:status": "./check-deploy.sh"
+        "deploy:test": "chmod +x deploy.sh && ./deploy.sh",
+        "deploy:status": "chmod +x check-deploy.sh && ./check-deploy.sh"
     },
     "devDependencies": {
         "@types/bun": "latest",
