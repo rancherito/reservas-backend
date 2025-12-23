@@ -31,10 +31,7 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     # Hacer pull de los cambios
     git pull origin main
 
-    # Instalar dependencias si package.json cambió
-    if git diff --name-only HEAD~1 | grep -q "package.json"; then
-        bun install
-    fi
+    bun install    
 
     # Reiniciar la aplicación con PM2
     if [ -f "/root/.bun/bin/pm2" ]; then
