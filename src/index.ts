@@ -1,6 +1,7 @@
+import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
-import { initDatabase } from './database/database';
+import { initDatabase } from './database/data-source';
 import habitacionesRoutes from './routes/habitaciones.routes';
 import usuariosRoutes from './routes/usuarios.routes';
 import registrosRoutes from './routes/registros.routes';
@@ -19,9 +20,6 @@ app.use(
     })
 );
 app.use(express.json());
-
-// Inicializar base de datos
-initDatabase();
 
 // Rutas
 app.use('/habitaciones', habitacionesRoutes);
@@ -58,26 +56,39 @@ app.get('/', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-    console.log(`📋 Documentación API: http://localhost:${PORT}`);
-    console.log(`📝 Endpoints disponibles:`);
-    console.log(`\n   HABITACIONES:`);
-    console.log(`   GET    /habitaciones      - Listar todas las habitaciones`);
-    console.log(`   GET    /habitaciones/:id  - Obtener una habitación`);
-    console.log(`   POST   /habitaciones      - Crear una habitación (máx 8 por piso)`);
-    console.log(`   PUT    /habitaciones/:id  - Actualizar una habitación`);
-    console.log(`   DELETE /habitaciones/:id  - Eliminar una habitación`);
-    console.log(`\n   USUARIOS:`);
-    console.log(`   GET    /usuarios          - Listar todos los usuarios`);
-    console.log(`   GET    /usuarios/:id      - Obtener un usuario`);
-    console.log(`   POST   /usuarios          - Crear un usuario`);
-    console.log(`   PUT    /usuarios/:id      - Actualizar un usuario`);
-    console.log(`   DELETE /usuarios/:id      - Eliminar un usuario`);
-    console.log(`\n   REGISTROS:`);
-    console.log(`   GET    /registros                      - Listar todos los registros (LEFT JOIN)`);
-    console.log(`   GET    /registros/:id                  - Obtener un registro por ID`);
-    console.log(`   GET    /registros/habitacion/:habitacionId - Obtener registro por ID de habitación`);
-    console.log(`   POST   /registros                      - Crear un registro (0=libre, 1=reservado, 2=ocupado)`);
-    console.log(`   PUT    /registros/:id                  - Actualizar un registro`);
-});
+// Inicializar base de datos y arrancar servidor
+const startServer = async () => {
+    try {
+        // Inicializar TypeORM y ejecutar migraciones
+        await initDatabase();
+
+        app.listen(PORT, () => {
+            console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+            console.log(`📋 Documentación API: http://localhost:${PORT}`);
+            console.log(`📝 Endpoints disponibles:`);
+            console.log(`\n   HABITACIONES:`);
+            console.log(`   GET    /habitaciones      - Listar todas las habitaciones`);
+            console.log(`   GET    /habitaciones/:id  - Obtener una habitación`);
+            console.log(`   POST   /habitaciones      - Crear una habitación (máx 8 por piso)`);
+            console.log(`   PUT    /habitaciones/:id  - Actualizar una habitación`);
+            console.log(`   DELETE /habitaciones/:id  - Eliminar una habitación`);
+            console.log(`\n   USUARIOS:`);
+            console.log(`   GET    /usuarios          - Listar todos los usuarios`);
+            console.log(`   GET    /usuarios/:id      - Obtener un usuario`);
+            console.log(`   POST   /usuarios          - Crear un usuario`);
+            console.log(`   PUT    /usuarios/:id      - Actualizar un usuario`);
+            console.log(`   DELETE /usuarios/:id      - Eliminar un usuario`);
+            console.log(`\n   REGISTROS:`);
+            console.log(`   GET    /registros                      - Listar todos los registros (LEFT JOIN)`);
+            console.log(`   GET    /registros/:id                  - Obtener un registro por ID`);
+            console.log(`   GET    /registros/habitacion/:habitacionId - Obtener registro por ID de habitación`);
+            console.log(`   POST   /registros                      - Crear un registro (0=libre, 1=reservado, 2=ocupado)`);
+            console.log(`   PUT    /registros/:id                  - Actualizar un registro`);
+        });
+    } catch (error) {
+        console.error('❌ Error al iniciar el servidor:', error);
+        process.exit(1);
+    }
+};
+
+startServer();

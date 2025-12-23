@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import { db } from '../database/database';
-import type { Habitacion } from '../types/types';
+import { getHabitacionRepository } from '../database/data-source';
 
 const router = Router();
 
 // GET - Listar todas las habitaciones
-router.get('/', (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
     try {
-        const habitaciones = db.query('SELECT * FROM habitaciones').all();
+        const habitacionRepo = getHabitacionRepository();
+        const habitaciones = await habitacionRepo.find();
         res.json(habitaciones);
     } catch (error) {
         res.status(500).json({ error: 'Error al listar habitaciones' });
@@ -16,10 +16,11 @@ router.get('/', (req: Request, res: Response) => {
 });
 
 // GET - Obtener una habitación por ID
-router.get('/:id', (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
     try {
         const id = parseInt(req.params.id || '0');
-        const habitacion = db.query('SELECT * FROM habitaciones WHERE id = ?').get(id);
+        const habitacionRepo = getHabitacionRepository();
+        const habitacion = await habitacionRepo.findOneBy({ id });
 
         if (!habitacion) {
             return res.status(404).json({ error: 'Habitación no encontrada' });
@@ -32,13 +33,14 @@ router.get('/:id', (req: Request, res: Response) => {
 });
 
 // POST - Crear una nueva habitación
-router.post('/', (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response) => {
     try {
         const { tipo_habitacion, piso } = req.body;
 
         if (!tipo_habitacion || piso === undefined) {
             return res.status(400).json({ error: 'tipo_habitacion y piso son requeridos' });
         }
+
         const tipos = ['simple', 'doble', 'ejecutiva'];
 
         if (!tipos.includes(tipo_habitacion.toLowerCase())) {
@@ -47,19 +49,21 @@ router.post('/', (req: Request, res: Response) => {
             });
         }
 
-        // Validar máximo 8 habitaciones por piso
-        const habitacionesPiso = db.query('SELECT COUNT(*) as total FROM habitaciones WHERE piso = ?').get(piso) as { total: number };
+        const habitacionRepo = getHabitacionRepository();
 
-        if (habitacionesPiso.total >= 8) {
+        // Validar máximo 8 habitaciones por piso
+        const habitacionesPiso = await habitacionRepo.countBy({ piso });
+
+        if (habitacionesPiso >= 8) {
             return res.status(400).json({
                 error: 'No se pueden crear más de 8 habitaciones por piso',
             });
         }
 
-        const query = db.query('INSERT INTO habitaciones (tipo_habitacion, piso) VALUES (?, ?) RETURNING *');
-        const habitacion = query.get(tipo_habitacion, piso);
+        const habitacion = habitacionRepo.create({ tipo_habitacion, piso });
+        const resultado = await habitacionRepo.save(habitacion);
 
-        res.status(201).json(habitacion);
+        res.status(201).json(resultado);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error al crear habitación' });
@@ -67,7 +71,7 @@ router.post('/', (req: Request, res: Response) => {
 });
 
 // PUT - Actualizar una habitación
-router.put('/:id', (req: Request, res: Response) => {
+router.put('/:id', async (req: Request, res: Response) => {
     try {
         const id = parseInt(req.params.id || '0');
         const { tipo_habitacion, piso } = req.body;
@@ -76,26 +80,29 @@ router.put('/:id', (req: Request, res: Response) => {
             return res.status(400).json({ error: 'tipo_habitacion y piso son requeridos' });
         }
 
+        const habitacionRepo = getHabitacionRepository();
+
         // Verificar si existe
-        const existe = db.query('SELECT * FROM habitaciones WHERE id = ?').get(id) as Habitacion | undefined;
+        const existe = await habitacionRepo.findOneBy({ id });
         if (!existe) {
             return res.status(404).json({ error: 'Habitación no encontrada' });
         }
 
         // Si cambia de piso, validar máximo 8 habitaciones en el nuevo piso
         if (existe.piso !== piso) {
-            const habitacionesPiso = db.query('SELECT COUNT(*) as total FROM habitaciones WHERE piso = ?').get(piso) as { total: number };
+            const habitacionesPiso = await habitacionRepo.countBy({ piso });
 
-            if (habitacionesPiso.total >= 8) {
+            if (habitacionesPiso >= 8) {
                 return res.status(400).json({
                     error: 'No se pueden tener más de 8 habitaciones por piso',
                 });
             }
         }
 
-        db.query('UPDATE habitaciones SET tipo_habitacion = ?, piso = ? WHERE id = ?').run(tipo_habitacion, piso, id);
+        existe.tipo_habitacion = tipo_habitacion;
+        existe.piso = piso;
+        const habitacion = await habitacionRepo.save(existe);
 
-        const habitacion = db.query('SELECT * FROM habitaciones WHERE id = ?').get(id);
         res.json(habitacion);
     } catch (error) {
         res.status(500).json({ error: 'Error al actualizar habitación' });
@@ -103,16 +110,17 @@ router.put('/:id', (req: Request, res: Response) => {
 });
 
 // DELETE - Eliminar una habitación
-router.delete('/:id', (req: Request, res: Response) => {
+router.delete('/:id', async (req: Request, res: Response) => {
     try {
         const id = parseInt(req.params.id || '0');
+        const habitacionRepo = getHabitacionRepository();
 
-        const existe = db.query('SELECT * FROM habitaciones WHERE id = ?').get(id);
+        const existe = await habitacionRepo.findOneBy({ id });
         if (!existe) {
             return res.status(404).json({ error: 'Habitación no encontrada' });
         }
 
-        db.query('DELETE FROM habitaciones WHERE id = ?').run(id);
+        await habitacionRepo.remove(existe);
         res.json({ message: 'Habitación eliminada exitosamente' });
     } catch (error) {
         res.status(500).json({ error: 'Error al eliminar habitación' });

@@ -1,79 +1,67 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import { db } from '../database/database';
-import type { Habitacion, Usuario, Registro } from '../types/types';
+import { getHabitacionRepository, getUsuarioRepository, getRegistroRepository } from '../database/data-source';
 
 const router = Router();
 
 // GET - Listar todos los registros con LEFT JOIN
-router.get('/', (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
     try {
+        const habitacionRepo = getHabitacionRepository();
+        const registroRepo = getRegistroRepository();
+
         // Obtener todas las habitaciones
-        const habitaciones = db.query('SELECT * FROM habitaciones').all() as Habitacion[];
+        const habitaciones = await habitacionRepo.find();
 
-        if (habitaciones.length === 0) return res.status(200).json([]); // No hay habitaciones, retornar arreglo vacío
+        if (habitaciones.length === 0) return res.status(200).json([]);
 
-        // Obtener todos los registros con LEFT JOIN
-        const registros = db
-            .query(
-                `
-      SELECT 
-        h.id as habitacion_id,
-        h.tipo_habitacion,
-        h.piso,
-        r.id as registro_id,
-        r.usuario_id,
-        r.estado,
-        r.fecha_registro,
-        u.id as usuario_id_full,
-        u.nombres,
-        u.primer_apellido,
-        u.segundo_apellido,
-        u.dni
-      FROM habitaciones h
-      LEFT JOIN registros r ON h.id = r.habitacion_id
-      LEFT JOIN usuarios u ON r.usuario_id = u.id
-    `
-            )
-            .all() as any[];
+        // Obtener todos los registros con relaciones
+        const registros = await registroRepo.find({
+            relations: ['habitacion', 'usuario'],
+        });
+
+        // Crear un mapa de registros por habitacion_id
+        const registroMap = new Map(registros.map(r => [r.habitacion_id, r]));
 
         // Construir respuesta con emulación de registros libres
-        const resultado = registros.map(row => {
-            if (row.registro_id === null) {
+        const resultado = habitaciones.map(hab => {
+            const registro = registroMap.get(hab.id);
+
+            if (!registro) {
                 // No hay registro, emular estado libre
                 return {
                     id: null,
-                    habitacion_id: row.habitacion_id,
+                    habitacion_id: hab.id,
                     usuario_id: null,
-                    estado: 0, // libre
+                    estado: 0,
                     fecha_registro: null,
                     habitacion: {
-                        id: row.habitacion_id,
-                        tipo_habitacion: row.tipo_habitacion,
-                        piso: row.piso,
+                        id: hab.id,
+                        tipo_habitacion: hab.tipo_habitacion,
+                        piso: hab.piso,
                     },
                     usuario: null,
                 };
             } else {
                 // Hay registro
                 return {
-                    id: row.registro_id,
-                    habitacion_id: row.habitacion_id,
-                    usuario_id: row.usuario_id,
-                    estado: row.estado,
-                    fecha_registro: row.fecha_registro,
+                    id: registro.id,
+                    habitacion_id: registro.habitacion_id,
+                    usuario_id: registro.usuario_id,
+                    estado: registro.estado,
+                    fecha_registro: registro.fecha_registro,
                     habitacion: {
-                        id: row.habitacion_id,
-                        tipo_habitacion: row.tipo_habitacion,
-                        piso: row.piso,
+                        id: hab.id,
+                        tipo_habitacion: hab.tipo_habitacion,
+                        piso: hab.piso,
                     },
-                    usuario: row.usuario_id
+                    usuario: registro.usuario
                         ? {
-                              id: row.usuario_id_full,
-                              nombres: row.nombres,
-                              primer_apellido: row.primer_apellido,
-                              segundo_apellido: row.segundo_apellido,
-                              dni: row.dni,
+                              id: registro.usuario.id,
+                              nombres: registro.usuario.nombres,
+                              primer_apellido: registro.usuario.primer_apellido,
+                              segundo_apellido: registro.usuario.segundo_apellido,
+                              dni: registro.usuario.dni,
                           }
                         : null,
                 };
@@ -88,54 +76,37 @@ router.get('/', (req: Request, res: Response) => {
 });
 
 // GET - Obtener un registro por ID de habitación con LEFT JOIN
-router.get('/habitacion/:habitacionId', (req: Request, res: Response) => {
+router.get('/habitacion/:habitacionId', async (req: Request, res: Response) => {
     try {
         const habitacionId = parseInt(req.params.habitacionId || '0');
+        const habitacionRepo = getHabitacionRepository();
+        const registroRepo = getRegistroRepository();
 
         // Verificar que la habitación existe
-        const habitacion = db.query('SELECT * FROM habitaciones WHERE id = ?').get(habitacionId) as Habitacion | undefined;
+        const habitacion = await habitacionRepo.findOneBy({ id: habitacionId });
 
         if (!habitacion) {
             return res.status(404).json({ error: 'Habitación no encontrada' });
         }
 
-        // Buscar el registro con LEFT JOIN
-        const row = db
-            .query(
-                `
-      SELECT 
-        h.id as habitacion_id,
-        h.tipo_habitacion,
-        h.piso,
-        r.id as registro_id,
-        r.usuario_id,
-        r.estado,
-        r.fecha_registro,
-        u.id as usuario_id_full,
-        u.nombres,
-        u.primer_apellido,
-        u.segundo_apellido,
-        u.dni
-      FROM habitaciones h
-      LEFT JOIN registros r ON h.id = r.habitacion_id
-      LEFT JOIN usuarios u ON r.usuario_id = u.id
-      WHERE h.id = ?
-    `
-            )
-            .get(habitacionId) as any;
+        // Buscar el registro con relaciones
+        const registro = await registroRepo.findOne({
+            where: { habitacion_id: habitacionId },
+            relations: ['usuario'],
+        });
 
-        if (row.registro_id === null) {
+        if (!registro) {
             // No hay registro, emular estado libre
             const resultado = {
                 id: null,
-                habitacion_id: row.habitacion_id,
+                habitacion_id: habitacion.id,
                 usuario_id: null,
-                estado: 0, // libre
+                estado: 0,
                 fecha_registro: null,
                 habitacion: {
-                    id: row.habitacion_id,
-                    tipo_habitacion: row.tipo_habitacion,
-                    piso: row.piso,
+                    id: habitacion.id,
+                    tipo_habitacion: habitacion.tipo_habitacion,
+                    piso: habitacion.piso,
                 },
                 usuario: null,
             };
@@ -143,23 +114,23 @@ router.get('/habitacion/:habitacionId', (req: Request, res: Response) => {
         } else {
             // Hay registro
             const resultado = {
-                id: row.registro_id,
-                habitacion_id: row.habitacion_id,
-                usuario_id: row.usuario_id,
-                estado: row.estado,
-                fecha_registro: row.fecha_registro,
+                id: registro.id,
+                habitacion_id: registro.habitacion_id,
+                usuario_id: registro.usuario_id,
+                estado: registro.estado,
+                fecha_registro: registro.fecha_registro,
                 habitacion: {
-                    id: row.habitacion_id,
-                    tipo_habitacion: row.tipo_habitacion,
-                    piso: row.piso,
+                    id: habitacion.id,
+                    tipo_habitacion: habitacion.tipo_habitacion,
+                    piso: habitacion.piso,
                 },
-                usuario: row.usuario_id
+                usuario: registro.usuario
                     ? {
-                          id: row.usuario_id_full,
-                          nombres: row.nombres,
-                          primer_apellido: row.primer_apellido,
-                          segundo_apellido: row.segundo_apellido,
-                          dni: row.dni,
+                          id: registro.usuario.id,
+                          nombres: registro.usuario.nombres,
+                          primer_apellido: registro.usuario.primer_apellido,
+                          segundo_apellido: registro.usuario.segundo_apellido,
+                          dni: registro.usuario.dni,
                       }
                     : null,
             };
@@ -172,7 +143,7 @@ router.get('/habitacion/:habitacionId', (req: Request, res: Response) => {
 });
 
 // POST - Crear un nuevo registro
-router.post('/', (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response) => {
     try {
         const { habitacion_id, usuario_id, estado } = req.body;
 
@@ -190,14 +161,18 @@ router.post('/', (req: Request, res: Response) => {
             });
         }
 
+        const habitacionRepo = getHabitacionRepository();
+        const usuarioRepo = getUsuarioRepository();
+        const registroRepo = getRegistroRepository();
+
         // Validar que la habitación existe
-        const habitacion = db.query('SELECT * FROM habitaciones WHERE id = ?').get(habitacion_id);
+        const habitacion = await habitacionRepo.findOneBy({ id: habitacion_id });
         if (!habitacion) {
             return res.status(404).json({ error: 'Habitación no encontrada' });
         }
 
         // Validar que no exista ya un registro para esta habitación
-        const registroExiste = db.query('SELECT * FROM registros WHERE habitacion_id = ?').get(habitacion_id);
+        const registroExiste = await registroRepo.findOneBy({ habitacion_id });
         if (registroExiste) {
             return res.status(400).json({
                 error: 'Ya existe un registro para esta habitación. Use PUT para actualizar.',
@@ -206,7 +181,7 @@ router.post('/', (req: Request, res: Response) => {
 
         // Si hay usuario_id, validar que existe
         if (usuario_id !== null && usuario_id !== undefined) {
-            const usuario = db.query('SELECT * FROM usuarios WHERE id = ?').get(usuario_id);
+            const usuario = await usuarioRepo.findOneBy({ id: usuario_id });
             if (!usuario) {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
             }
@@ -214,10 +189,15 @@ router.post('/', (req: Request, res: Response) => {
 
         // Crear registro con fecha actual en UTC
         const fecha_registro = new Date().toISOString();
-        const query = db.query('INSERT INTO registros (habitacion_id, usuario_id, estado, fecha_registro) VALUES (?, ?, ?, ?) RETURNING *');
-        const registro = query.get(habitacion_id, usuario_id || null, estado, fecha_registro);
+        const registro = registroRepo.create({
+            habitacion_id,
+            usuario_id: usuario_id || null,
+            estado,
+            fecha_registro,
+        });
+        const resultado = await registroRepo.save(registro);
 
-        res.status(201).json(registro);
+        res.status(201).json(resultado);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error al crear registro' });
@@ -225,7 +205,7 @@ router.post('/', (req: Request, res: Response) => {
 });
 
 // PUT - Actualizar un registro
-router.put('/:id', (req: Request, res: Response) => {
+router.put('/:id', async (req: Request, res: Response) => {
     try {
         const id = parseInt(req.params.id || '0');
         const { usuario_id, estado } = req.body;
@@ -241,24 +221,28 @@ router.put('/:id', (req: Request, res: Response) => {
             });
         }
 
+        const usuarioRepo = getUsuarioRepository();
+        const registroRepo = getRegistroRepository();
+
         // Verificar que el registro existe
-        const existe = db.query('SELECT * FROM registros WHERE id = ?').get(id);
+        const existe = await registroRepo.findOneBy({ id });
         if (!existe) {
             return res.status(404).json({ error: 'Registro no encontrado' });
         }
 
         // Si hay usuario_id, validar que existe
         if (usuario_id !== null && usuario_id !== undefined) {
-            const usuario = db.query('SELECT * FROM usuarios WHERE id = ?').get(usuario_id);
+            const usuario = await usuarioRepo.findOneBy({ id: usuario_id });
             if (!usuario) {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
             }
         }
 
         // Actualizar registro con nueva fecha
-        const fecha_registro = new Date().toISOString();
-        const query = db.query('UPDATE registros SET usuario_id = ?, estado = ?, fecha_registro = ? WHERE id = ? RETURNING *');
-        const registro = query.get(usuario_id || null, estado, fecha_registro, id);
+        existe.usuario_id = usuario_id || null;
+        existe.estado = estado;
+        existe.fecha_registro = new Date().toISOString();
+        const registro = await registroRepo.save(existe);
 
         res.json(registro);
     } catch (error) {
