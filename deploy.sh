@@ -31,6 +31,9 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     # Descartar cambios locales y hacer pull
     git reset --hard HEAD
     git pull origin main
+    
+    # Restaurar permisos de ejecución
+    chmod +x /root/reservas-backend/deploy.sh
 
     # Instalar dependencias
     bun install
