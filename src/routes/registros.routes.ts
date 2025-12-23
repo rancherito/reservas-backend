@@ -13,6 +13,8 @@ router.get("/", (req: Request, res: Response) => {
       .query("SELECT * FROM habitaciones")
       .all() as Habitacion[];
 
+    if (habitaciones.length === 0) return res.status(200).json([]); // No hay habitaciones, retornar arreglo vacío
+
     // Obtener todos los registros con LEFT JOIN
     const registros = db
       .query(
