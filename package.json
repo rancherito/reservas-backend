@@ -36,7 +36,6 @@
         "express": "^5.2.1",
         "reflect-metadata": "^0.2.2",
         "sql.js": "^1.13.0",
-        "typeorm": "^0.3.28",
-        "uuid": "^13.0.0"
+        "typeorm": "^0.3.28"
     }
 }
