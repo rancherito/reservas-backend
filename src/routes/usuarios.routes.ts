@@ -1,8 +1,6 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import { db } from "../database/database";
-import type { Usuario } from "../types/types";
-
 const router = Router();
 
 // GET - Listar todos los usuarios
@@ -19,9 +17,7 @@ router.get("/", (req: Request, res: Response) => {
 router.get("/:id", (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id || "0");
-    const usuario = db
-      .query("SELECT * FROM usuarios WHERE id = ?")
-      .get(id);
+    const usuario = db.query("SELECT * FROM usuarios WHERE id = ?").get(id);
 
     if (!usuario) {
       return res.status(404).json({ error: "Usuario no encontrado" });
@@ -41,24 +37,25 @@ router.post("/", (req: Request, res: Response) => {
     // Validar campos requeridos
     if (!nombres || !primer_apellido || !segundo_apellido || !dni) {
       return res.status(400).json({
-        error: "Todos los campos son requeridos: nombres, primer_apellido, segundo_apellido, dni"
+        error:
+          "Todos los campos son requeridos: nombres, primer_apellido, segundo_apellido, dni",
       });
     }
 
     // Validar si el DNI ya existe
-    const usuarioExiste = db.query(
-      "SELECT * FROM usuarios WHERE dni = ?"
-    ).get(dni);
+    const usuarioExiste = db
+      .query("SELECT * FROM usuarios WHERE dni = ?")
+      .get(dni);
 
     if (usuarioExiste) {
       return res.status(400).json({
-        error: "Ya existe un usuario registrado con este DNI"
+        error: "Ya existe un usuario registrado con este DNI",
       });
     }
 
     // Crear el usuario
     const query = db.query(
-      "INSERT INTO usuarios (nombres, primer_apellido, segundo_apellido, dni) VALUES (?, ?, ?, ?) RETURNING *"
+      "INSERT INTO usuarios (nombres, primer_apellido, segundo_apellido, dni) VALUES (?, ?, ?, ?) RETURNING *",
     );
     const usuario = query.get(nombres, primer_apellido, segundo_apellido, dni);
 
@@ -78,7 +75,8 @@ router.put("/:id", (req: Request, res: Response) => {
     // Validar campos requeridos
     if (!nombres || !primer_apellido || !segundo_apellido || !dni) {
       return res.status(400).json({
-        error: "Todos los campos son requeridos: nombres, primer_apellido, segundo_apellido, dni"
+        error:
+          "Todos los campos son requeridos: nombres, primer_apellido, segundo_apellido, dni",
       });
     }
 
@@ -89,19 +87,19 @@ router.put("/:id", (req: Request, res: Response) => {
     }
 
     // Validar si el DNI ya existe en otro usuario
-    const dniExiste = db.query(
-      "SELECT * FROM usuarios WHERE dni = ? AND id != ?"
-    ).get(dni, id);
+    const dniExiste = db
+      .query("SELECT * FROM usuarios WHERE dni = ? AND id != ?")
+      .get(dni, id);
 
     if (dniExiste) {
       return res.status(400).json({
-        error: "Ya existe otro usuario registrado con este DNI"
+        error: "Ya existe otro usuario registrado con este DNI",
       });
     }
 
     // Actualizar el usuario
     db.query(
-      "UPDATE usuarios SET nombres = ?, primer_apellido = ?, segundo_apellido = ?, dni = ? WHERE id = ?"
+      "UPDATE usuarios SET nombres = ?, primer_apellido = ?, segundo_apellido = ?, dni = ? WHERE id = ?",
     ).run(nombres, primer_apellido, segundo_apellido, dni, id);
 
     const usuario = db.query("SELECT * FROM usuarios WHERE id = ?").get(id);
