@@ -28,9 +28,11 @@ REMOTE=$(git rev-parse origin/main)
 if [ "$LOCAL" != "$REMOTE" ]; then
     echo "$(date): Cambios detectados. Actualizando..."
 
-    # Hacer pull de los cambios
+    # Descartar cambios locales y hacer pull
+    git reset --hard HEAD
     git pull origin main
 
+    # Instalar dependencias
     bun install    
 
     # Reiniciar la aplicación con PM2
