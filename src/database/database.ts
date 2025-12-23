@@ -1,11 +1,11 @@
-import { Database } from "bun:sqlite";
+import { Database } from 'bun:sqlite';
 
-export const db = new Database("reservas.db");
+export const db = new Database('reservas.db');
 
 // Crear tablas si no existen
 export const initDatabase = () => {
-  // Crear tabla de habitaciones
-  db.run(`
+    // Crear tabla de habitaciones
+    db.run(`
     CREATE TABLE IF NOT EXISTS habitaciones (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       tipo_habitacion TEXT NOT NULL,
@@ -13,8 +13,8 @@ export const initDatabase = () => {
     )
   `);
 
-  // Crear tabla de usuarios
-  db.run(`
+    // Crear tabla de usuarios
+    db.run(`
     CREATE TABLE IF NOT EXISTS usuarios (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nombres TEXT NOT NULL,
@@ -24,8 +24,8 @@ export const initDatabase = () => {
     )
   `);
 
-  // Crear tabla de registros
-  db.run(`
+    // Crear tabla de registros
+    db.run(`
     CREATE TABLE IF NOT EXISTS registros (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       habitacion_id INTEGER NOT NULL UNIQUE,
@@ -37,5 +37,5 @@ export const initDatabase = () => {
     )
   `);
 
-  console.log("✅ Base de datos inicializada");
+    console.log('✅ Base de datos inicializada');
 };
