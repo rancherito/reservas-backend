@@ -12,12 +12,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:3000/habitaciones",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
+					"raw": "https://hotel.caffeedev.com/habitaciones",
+					"protocol": "https",
+					"host": ["hotel","caffeedev","com"],
 					"path": [
 						"habitaciones"
 					]
@@ -32,12 +29,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:3000/habitaciones/1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
+					"raw": "https://hotel.caffeedev.com/habitaciones/1",
+					"protocol": "https",
+					"host": ["hotel","caffeedev","com"],
 					"path": [
 						"habitaciones",
 						"1"
@@ -62,12 +56,9 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/habitaciones",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
+					"raw": "https://hotel.caffeedev.com/habitaciones",
+					"protocol": "https",
+					"host": ["hotel","caffeedev","com"],
 					"path": [
 						"habitaciones"
 					]
@@ -91,12 +82,9 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/habitaciones/1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
+					"raw": "https://hotel.caffeedev.com/habitaciones/1",
+					"protocol": "https",
+					"host": ["hotel","caffeedev","com"],
 					"path": [
 						"habitaciones",
 						"1"
@@ -112,12 +100,9 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:3000/habitaciones/1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
+					"raw": "https://hotel.caffeedev.com/habitaciones/1",
+					"protocol": "https",
+					"host": ["hotel","caffeedev","com"],
 					"path": [
 						"habitaciones",
 						"1"
@@ -133,12 +118,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:3000/usuarios",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
+					"raw": "https://hotel.caffeedev.com/usuarios",
+					"protocol": "https",
+					"host": ["hotel","caffeedev","com"],
 					"path": [
 						"usuarios"
 					]
@@ -153,12 +135,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:3000/usuarios/1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
+					"raw": "https://hotel.caffeedev.com/usuarios/1",
+					"protocol": "https",
+					"host": ["hotel","caffeedev","com"],
 					"path": [
 						"usuarios",
 						"1"
@@ -183,12 +162,9 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/usuarios",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
+					"raw": "https://hotel.caffeedev.com/usuarios",
+					"protocol": "https",
+					"host": ["hotel","caffeedev","com"],
 					"path": [
 						"usuarios"
 					]
@@ -212,12 +188,9 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/usuarios/1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
+					"raw": "https://hotel.caffeedev.com/usuarios/1",
+					"protocol": "https",
+					"host": ["hotel","caffeedev","com"],
 					"path": [
 						"usuarios",
 						"1"
@@ -233,12 +206,9 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:3000/usuarios/1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
+					"raw": "https://hotel.caffeedev.com/usuarios/1",
+					"protocol": "https",
+					"host": ["hotel","caffeedev","com"],
 					"path": [
 						"usuarios",
 						"1"

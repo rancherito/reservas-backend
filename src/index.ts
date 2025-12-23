@@ -7,8 +7,13 @@ import usuariosRoutes from "./routes/usuarios.routes";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
+// Middleware CORS - Permitir todos los orígenes
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: false
+}));
 app.use(express.json());
 
 // Inicializar base de datos
