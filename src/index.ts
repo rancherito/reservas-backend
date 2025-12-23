@@ -3,6 +3,7 @@ import cors from "cors";
 import { initDatabase } from "./database/database";
 import habitacionesRoutes from "./routes/habitaciones.routes";
 import usuariosRoutes from "./routes/usuarios.routes";
+import registrosRoutes from "./routes/registros.routes";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +24,7 @@ initDatabase();
 // Rutas
 app.use("/habitaciones", habitacionesRoutes);
 app.use("/usuarios", usuariosRoutes);
+app.use("/registros", registrosRoutes);
 
 // Ruta raíz
 app.get("/", (req, res) => {
@@ -42,6 +44,13 @@ app.get("/", (req, res) => {
         "POST /usuarios": "Crear un usuario",
         "PUT /usuarios/:id": "Actualizar un usuario",
         "DELETE /usuarios/:id": "Eliminar un usuario"
+      },
+      registros: {
+        "GET /registros": "Listar todos los registros (LEFT JOIN con habitaciones)",
+        "GET /registros/:id": "Obtener un registro por ID",
+        "GET /registros/habitacion/:habitacionId": "Obtener registro por ID de habitación",
+        "POST /registros": "Crear un registro (0=libre, 1=reservado, 2=ocupado)",
+        "PUT /registros/:id": "Actualizar un registro"
       }
     }
   });
@@ -63,4 +72,10 @@ app.listen(PORT, () => {
   console.log(`   POST   /usuarios          - Crear un usuario`);
   console.log(`   PUT    /usuarios/:id      - Actualizar un usuario`);
   console.log(`   DELETE /usuarios/:id      - Eliminar un usuario`);
+  console.log(`\n   REGISTROS:`);
+  console.log(`   GET    /registros                      - Listar todos los registros (LEFT JOIN)`);
+  console.log(`   GET    /registros/:id                  - Obtener un registro por ID`);
+  console.log(`   GET    /registros/habitacion/:habitacionId - Obtener registro por ID de habitación`);
+  console.log(`   POST   /registros                      - Crear un registro (0=libre, 1=reservado, 2=ocupado)`);
+  console.log(`   PUT    /registros/:id                  - Actualizar un registro`);
 });

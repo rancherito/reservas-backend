@@ -24,5 +24,18 @@ export const initDatabase = () => {
     )
   `);
 
+  // Crear tabla de registros
+  db.run(`
+    CREATE TABLE IF NOT EXISTS registros (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      habitacion_id INTEGER NOT NULL UNIQUE,
+      usuario_id INTEGER,
+      estado INTEGER NOT NULL DEFAULT 0,
+      fecha_registro TEXT NOT NULL,
+      FOREIGN KEY (habitacion_id) REFERENCES habitaciones(id) ON DELETE CASCADE,
+      FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
+    )
+  `);
+
   console.log("✅ Base de datos inicializada");
 };

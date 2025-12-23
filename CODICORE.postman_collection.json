@@ -1,222 +1,282 @@
 {
-	"info": {
-		"_postman_id": "7f71eeb7-1bc3-4121-b421-6457d43d2b4a",
-		"name": "CODICORE",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "8181238"
-	},
-	"item": [
-		{
-			"name": "Listar todas las habitaciones",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://hotel.caffeedev.com/habitaciones",
-					"protocol": "https",
-					"host": ["hotel","caffeedev","com"],
-					"path": [
-						"habitaciones"
-					]
-				},
-				"description": "Obtiene la lista completa de todas las habitaciones registradas en el sistema."
-			},
-			"response": []
-		},
-		{
-			"name": "Obtener habitación por ID",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://hotel.caffeedev.com/habitaciones/1",
-					"protocol": "https",
-					"host": ["hotel","caffeedev","com"],
-					"path": [
-						"habitaciones",
-						"1"
-					]
-				},
-				"description": "Obtiene la información detallada de una habitación específica mediante su ID."
-			},
-			"response": []
-		},
-		{
-			"name": "Crear habitación",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"tipo_habitacion\": \"ejecutiva\",\n    \"piso\": 3\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "https://hotel.caffeedev.com/habitaciones",
-					"protocol": "https",
-					"host": ["hotel","caffeedev","com"],
-					"path": [
-						"habitaciones"
-					]
-				},
-				"description": "Crea una nueva habitación en el sistema. Requiere tipo_habitacion (string) y piso (number). Máximo 8 habitaciones por piso."
-			},
-			"response": []
-		},
-		{
-			"name": "Actualizar habitación",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"tipo_habitacion\": \"suite\",\n    \"piso\": 5\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "https://hotel.caffeedev.com/habitaciones/1",
-					"protocol": "https",
-					"host": ["hotel","caffeedev","com"],
-					"path": [
-						"habitaciones",
-						"1"
-					]
-				},
-				"description": "Actualiza la información de una habitación existente. Requiere el ID en la URL y los campos tipo_habitacion (string) y piso (number) en el body."
-			},
-			"response": []
-		},
-		{
-			"name": "Eliminar habitación",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"url": {
-					"raw": "https://hotel.caffeedev.com/habitaciones/1",
-					"protocol": "https",
-					"host": ["hotel","caffeedev","com"],
-					"path": [
-						"habitaciones",
-						"1"
-					]
-				},
-				"description": "Elimina una habitación del sistema mediante su ID."
-			},
-			"response": []
-		},
-		{
-			"name": "Listar todos los usuarios",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://hotel.caffeedev.com/usuarios",
-					"protocol": "https",
-					"host": ["hotel","caffeedev","com"],
-					"path": [
-						"usuarios"
-					]
-				},
-				"description": "Obtiene la lista completa de todos los usuarios registrados en el sistema."
-			},
-			"response": []
-		},
-		{
-			"name": "Obtener usuario por ID",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://hotel.caffeedev.com/usuarios/1",
-					"protocol": "https",
-					"host": ["hotel","caffeedev","com"],
-					"path": [
-						"usuarios",
-						"1"
-					]
-				},
-				"description": "Obtiene la información detallada de un usuario específico mediante su ID."
-			},
-			"response": []
-		},
-		{
-			"name": "Crear usuario",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"nombres\": \"Juan Carlos\",\n    \"primer_apellido\": \"García\",\n    \"segundo_apellido\": \"López\",\n    \"dni\": \"12345678\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "https://hotel.caffeedev.com/usuarios",
-					"protocol": "https",
-					"host": ["hotel","caffeedev","com"],
-					"path": [
-						"usuarios"
-					]
-				},
-				"description": "Crea un nuevo usuario en el sistema. Requiere nombres, primer_apellido, segundo_apellido y dni. Valida que el DNI no esté duplicado."
-			},
-			"response": []
-		},
-		{
-			"name": "Actualizar usuario",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"nombres\": \"Juan Carlos\",\n    \"primer_apellido\": \"García\",\n    \"segundo_apellido\": \"Martínez\",\n    \"dni\": \"12345678\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "https://hotel.caffeedev.com/usuarios/1",
-					"protocol": "https",
-					"host": ["hotel","caffeedev","com"],
-					"path": [
-						"usuarios",
-						"1"
-					]
-				},
-				"description": "Actualiza la información de un usuario existente. Requiere el ID en la URL y todos los campos en el body. Valida que el DNI no esté duplicado en otro usuario."
-			},
-			"response": []
-		},
-		{
-			"name": "Eliminar usuario",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"url": {
-					"raw": "https://hotel.caffeedev.com/usuarios/1",
-					"protocol": "https",
-					"host": ["hotel","caffeedev","com"],
-					"path": [
-						"usuarios",
-						"1"
-					]
-				},
-				"description": "Elimina un usuario del sistema mediante su ID."
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "52527645-9e8c-42f3-8580-4c1ed98cc7ab",
+    "name": "CODICORE",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "8181238",
+    "_collection_link": "https://codi00.postman.co/workspace/codi-Workspace~59e3977a-5ab7-4a7e-8dfa-1190ac401a79/collection/8181238-52527645-9e8c-42f3-8580-4c1ed98cc7ab?action=share&source=collection_link&creator=8181238"
+  },
+  "item": [
+    {
+      "name": "Listar todas las habitaciones",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/habitaciones",
+          "host": ["{{baseURL}}"],
+          "path": ["habitaciones"]
+        },
+        "description": "Obtiene la lista completa de todas las habitaciones registradas en el sistema."
+      },
+      "response": []
+    },
+    {
+      "name": "Obtener habitación por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/habitaciones/1",
+          "host": ["{{baseURL}}"],
+          "path": ["habitaciones", "1"]
+        },
+        "description": "Obtiene la información detallada de una habitación específica mediante su ID."
+      },
+      "response": []
+    },
+    {
+      "name": "Crear habitación",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"tipo_habitacion\": \"ejecutiva\",\n    \"piso\": 3\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/habitaciones",
+          "host": ["{{baseURL}}"],
+          "path": ["habitaciones"]
+        },
+        "description": "Crea una nueva habitación en el sistema. Requiere tipo_habitacion (string) y piso (number). Máximo 8 habitaciones por piso."
+      },
+      "response": []
+    },
+    {
+      "name": "Actualizar habitación",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"tipo_habitacion\": \"suite\",\n    \"piso\": 5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/habitaciones/1",
+          "host": ["{{baseURL}}"],
+          "path": ["habitaciones", "1"]
+        },
+        "description": "Actualiza la información de una habitación existente. Requiere el ID en la URL y los campos tipo_habitacion (string) y piso (number) en el body."
+      },
+      "response": []
+    },
+    {
+      "name": "Eliminar habitación",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/habitaciones/1",
+          "host": ["{{baseURL}}"],
+          "path": ["habitaciones", "1"]
+        },
+        "description": "Elimina una habitación del sistema mediante su ID."
+      },
+      "response": []
+    },
+    {
+      "name": "Listar todos los usuarios",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/usuarios",
+          "host": ["{{baseURL}}"],
+          "path": ["usuarios"]
+        },
+        "description": "Obtiene la lista completa de todos los usuarios registrados en el sistema."
+      },
+      "response": []
+    },
+    {
+      "name": "Obtener usuario por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/usuarios/1",
+          "host": ["{{baseURL}}"],
+          "path": ["usuarios", "1"]
+        },
+        "description": "Obtiene la información detallada de un usuario específico mediante su ID."
+      },
+      "response": []
+    },
+    {
+      "name": "Crear usuario",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"nombres\": \"Juan Carlos\",\n    \"primer_apellido\": \"García\",\n    \"segundo_apellido\": \"López\",\n    \"dni\": \"12345678\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/usuarios",
+          "host": ["{{baseURL}}"],
+          "path": ["usuarios"]
+        },
+        "description": "Crea un nuevo usuario en el sistema. Requiere nombres, primer_apellido, segundo_apellido y dni. Valida que el DNI no esté duplicado."
+      },
+      "response": []
+    },
+    {
+      "name": "Actualizar usuario",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"nombres\": \"Juan Carlos\",\n    \"primer_apellido\": \"García\",\n    \"segundo_apellido\": \"Martínez\",\n    \"dni\": \"12345678\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/usuarios/1",
+          "host": ["{{baseURL}}"],
+          "path": ["usuarios", "1"]
+        },
+        "description": "Actualiza la información de un usuario existente. Requiere el ID en la URL y todos los campos en el body. Valida que el DNI no esté duplicado en otro usuario."
+      },
+      "response": []
+    },
+    {
+      "name": "Eliminar usuario",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/usuarios/1",
+          "host": ["{{baseURL}}"],
+          "path": ["usuarios", "1"]
+        },
+        "description": "Elimina un usuario del sistema mediante su ID."
+      },
+      "response": []
+    },
+    {
+      "name": "Listar todos los registros",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/registros",
+          "host": ["{{baseURL}}"],
+          "path": ["registros"]
+        },
+        "description": "Obtiene la lista completa de todos los registros con LEFT JOIN. Si una habitación no tiene registro, se emula con estado libre (0) y usuario null."
+      },
+      "response": []
+    },
+    {
+      "name": "Obtener registro por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/registros/1",
+          "host": ["{{baseURL}}"],
+          "path": ["registros", "1"]
+        },
+        "description": "Obtiene la información detallada de un registro específico mediante su ID."
+      },
+      "response": []
+    },
+    {
+      "name": "Obtener registro por ID de habitación",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/registros/habitacion/1",
+          "host": ["{{baseURL}}"],
+          "path": ["registros", "habitacion", "1"]
+        },
+        "description": "Obtiene el registro de una habitación específica. Si no existe registro, se emula con estado libre (0) y usuario null."
+      },
+      "response": []
+    },
+    {
+      "name": "Crear registro",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"habitacion_id\": 1,\n    \"usuario_id\": 1,\n    \"estado\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/registros",
+          "host": ["{{baseURL}}"],
+          "path": ["registros"]
+        },
+        "description": "Crea un nuevo registro. Estados: 0=libre, 1=reservado, 2=ocupado. Requiere habitacion_id y estado. usuario_id es opcional (null para estado libre). La fecha_registro se genera automáticamente en UTC."
+      },
+      "response": []
+    },
+    {
+      "name": "Actualizar registro",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"usuario_id\": 2,\n    \"estado\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/registros/1",
+          "host": ["{{baseURL}}"],
+          "path": ["registros", "1"]
+        },
+        "description": "Actualiza un registro existente. Estados: 0=libre, 1=reservado, 2=ocupado. Requiere estado. usuario_id es opcional. La fecha_registro se actualiza automáticamente."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": "",
+      "type": "default"
+    }
+  ]
 }
