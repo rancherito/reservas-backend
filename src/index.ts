@@ -9,10 +9,11 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware CORS - Permitir todos los orígenes
 app.use(cors({
-  origin: '*',
+  origin: true, // Permite cualquier origen
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: false
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  credentials: false,
+  optionsSuccessStatus: 200 // Para algunos navegadores antiguos
 }));
 app.use(express.json());
 
