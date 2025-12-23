@@ -11,7 +11,11 @@
     "pm2:restart": "pm2 restart reservas-backend",
     "pm2:delete": "pm2 delete reservas-backend",
     "pm2:logs": "pm2 logs reservas-backend",
-    "pm2:monit": "pm2 monit"
+    "pm2:monit": "pm2 monit",
+    "deploy:setup": "chmod +x setup-deploy.sh && chmod +x deploy.sh && ./setup-deploy.sh",
+    "deploy:logs": "tail -f deploy.log",
+    "deploy:test": "./deploy.sh",
+    "deploy:status": "./check-deploy.sh"
   },
   "devDependencies": {
     "@types/bun": "latest"

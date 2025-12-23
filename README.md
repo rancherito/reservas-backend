@@ -30,7 +30,55 @@ reservas-backend/
 bun install
 
 # Ejecutar en desarrollo
-bun run src/index.ts
+bun run dev
+
+# Ejecutar en producción con PM2
+bun run pm2:start
+```
+
+## 🔄 Despliegue Automático
+
+El sistema incluye despliegue automático que verifica cambios en Git cada minuto.
+
+### Configuración Inicial
+
+```bash
+# Configurar despliegue automático
+bun run deploy:setup
+
+# Ver logs del despliegue
+bun run deploy:logs
+
+# Probar el script de despliegue manualmente
+bun run deploy:test
+```
+
+### Cómo Funciona
+
+1. **Cada minuto** se ejecuta un cron job que:
+   - Verifica si hay cambios en `origin/main`
+   - Si hay cambios: hace `git pull`, instala dependencias si es necesario, y reinicia PM2
+   - Registra todas las acciones en `deploy.log`
+
+2. **Archivos relacionados**:
+   - `deploy.sh` - Script principal de despliegue
+   - `setup-deploy.sh` - Configura el cron job
+   - `deploy.log` - Log de todas las operaciones
+
+### Comandos de Gestión
+
+```bash
+# Ver estado del despliegue automático
+bun run deploy:status
+
+# Ver logs de despliegue
+bun run deploy:logs
+
+# Ver estado de PM2
+bun run pm2:logs
+
+# Reiniciar aplicación
+bun run pm2:restart
 ```
 
 ## 📝 Endpoints Disponibles
