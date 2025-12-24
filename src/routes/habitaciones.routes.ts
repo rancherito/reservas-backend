@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import { getHabitacionRepository } from '../database/data-source';
+import { getHabitacionRepository, getRegistroRepository } from '../database/data-source';
 
 const router = Router();
 
@@ -114,10 +114,17 @@ router.delete('/:id', async (req: Request, res: Response) => {
     try {
         const id = parseInt(req.params.id || '0');
         const habitacionRepo = getHabitacionRepository();
+        const registroRepo = getRegistroRepository();
 
         const existe = await habitacionRepo.findOneBy({ id });
         if (!existe) {
             return res.status(404).json({ error: 'Habitación no encontrada' });
+        }
+
+        // Eliminar el registro asociado si existe
+        const registroAsociado = await registroRepo.findOneBy({ habitacion_id: id });
+        if (registroAsociado) {
+            await registroRepo.remove(registroAsociado);
         }
 
         await habitacionRepo.remove(existe);

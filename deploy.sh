@@ -39,16 +39,7 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     bun install
 
     # Reiniciar la aplicación con PM2
-    if command -v pm2 &> /dev/null; then
-        pm2 restart reservas-backend
-    elif [ -f "/root/.bun/bin/pm2" ]; then
-        /root/.bun/bin/pm2 restart reservas-backend
-    elif [ -f "/usr/local/bin/pm2" ]; then
-        /usr/local/bin/pm2 restart reservas-backend
-    else
-        echo "$(date): ❌ Error: PM2 no encontrado"
-        exit 1
-    fi
+    pm2 restart reservas-backend 
 
     echo "$(date): ✅ Despliegue completado exitosamente"
 else
