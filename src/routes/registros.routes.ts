@@ -142,7 +142,7 @@ router.get('/habitacion/:habitacionId', async (req: Request, res: Response) => {
     }
 });
 
-// POST - Crear un nuevo registro
+// POST - Crear o actualizar un registro
 router.post('/', async (req: Request, res: Response) => {
     try {
         const { habitacion_id, usuario_id, estado } = req.body;
@@ -171,83 +171,39 @@ router.post('/', async (req: Request, res: Response) => {
             return res.status(404).json({ error: 'Habitación no encontrada' });
         }
 
-        // Validar que no exista ya un registro para esta habitación
+        // Si hay usuario_id, validar que existe
+        if (usuario_id !== null && usuario_id !== undefined) {
+            const usuario = await usuarioRepo.findOneBy({ id: usuario_id });
+            if (!usuario) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+        }
+
+        // Buscar si ya existe un registro para esta habitación
         const registroExiste = await registroRepo.findOneBy({ habitacion_id });
+
         if (registroExiste) {
-            return res.status(400).json({
-                error: 'Ya existe un registro para esta habitación. Use PUT para actualizar.',
+            // Actualizar registro existente
+            registroExiste.usuario_id = usuario_id || null;
+            registroExiste.estado = estado;
+            registroExiste.fecha_registro = new Date().toISOString();
+            const resultado = await registroRepo.save(registroExiste);
+            return res.json(resultado);
+        } else {
+            // Crear nuevo registro con fecha actual en UTC
+            const fecha_registro = new Date().toISOString();
+            const registro = registroRepo.create({
+                habitacion_id,
+                usuario_id: usuario_id || null,
+                estado,
+                fecha_registro,
             });
+            const resultado = await registroRepo.save(registro);
+            return res.status(201).json(resultado);
         }
-
-        // Si hay usuario_id, validar que existe
-        if (usuario_id !== null && usuario_id !== undefined) {
-            const usuario = await usuarioRepo.findOneBy({ id: usuario_id });
-            if (!usuario) {
-                return res.status(404).json({ error: 'Usuario no encontrado' });
-            }
-        }
-
-        // Crear registro con fecha actual en UTC
-        const fecha_registro = new Date().toISOString();
-        const registro = registroRepo.create({
-            habitacion_id,
-            usuario_id: usuario_id || null,
-            estado,
-            fecha_registro,
-        });
-        const resultado = await registroRepo.save(registro);
-
-        res.status(201).json(resultado);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Error al crear registro' });
-    }
-});
-
-// PUT - Actualizar un registro
-router.put('/:id', async (req: Request, res: Response) => {
-    try {
-        const id = parseInt(req.params.id || '0');
-        const { usuario_id, estado } = req.body;
-
-        if (estado === undefined) {
-            return res.status(400).json({ error: 'estado es requerido' });
-        }
-
-        // Validar estado (0, 1, 2)
-        if (![0, 1, 2].includes(estado)) {
-            return res.status(400).json({
-                error: 'Estado inválido. Valores permitidos: 0 (libre), 1 (reservado), 2 (ocupado)',
-            });
-        }
-
-        const usuarioRepo = getUsuarioRepository();
-        const registroRepo = getRegistroRepository();
-
-        // Verificar que el registro existe
-        const existe = await registroRepo.findOneBy({ id });
-        if (!existe) {
-            return res.status(404).json({ error: 'Registro no encontrado' });
-        }
-
-        // Si hay usuario_id, validar que existe
-        if (usuario_id !== null && usuario_id !== undefined) {
-            const usuario = await usuarioRepo.findOneBy({ id: usuario_id });
-            if (!usuario) {
-                return res.status(404).json({ error: 'Usuario no encontrado' });
-            }
-        }
-
-        // Actualizar registro con nueva fecha
-        existe.usuario_id = usuario_id || null;
-        existe.estado = estado;
-        existe.fecha_registro = new Date().toISOString();
-        const registro = await registroRepo.save(existe);
-
-        res.json(registro);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al actualizar registro' });
+        res.status(500).json({ error: 'Error al crear o actualizar registro' });
     }
 });
 
